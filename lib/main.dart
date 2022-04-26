@@ -90,7 +90,7 @@ class MyHomePageInheritedWidget extends InheritedWidget {
 
   @override
   bool updateShouldNotify(MyHomePageInheritedWidget oldWidget) {
-    return true;
+    return counter != oldWidget.counter;
   }
 }
 
