@@ -26,43 +26,109 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<MyHomePage> createState() => MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class MyHomePageState extends State<MyHomePage> {
+  int counter = 0;
 
-  void _incrementCounter() {
+  void incrementCounter() {
     setState(() {
-      _counter++;
+      counter++;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+    print('MyHomePageStateをビルド');
+    return MyHomePageInheritedWidget(
+      data: this,
+      counter: counter,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(widget.title),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const <Widget>[
+              WidgetA(),
+              WidgetB(),
+              WidgetC(),
+            ],
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
+    );
+  }
+}
+
+class MyHomePageInheritedWidget extends InheritedWidget {
+  const MyHomePageInheritedWidget({
+    Key? key,
+    required Widget child,
+    required this.data,
+    required this.counter,
+  }) : super(key: key, child: child);
+
+  final MyHomePageState data;
+  final int counter;
+
+  static MyHomePageState of(BuildContext context, {bool listen = true}) {
+    if (listen) {
+      return (context
+              .dependOnInheritedWidgetOfExactType<MyHomePageInheritedWidget>())!
+          .data;
+    } else {
+      return (context
+              .getElementForInheritedWidgetOfExactType<
+                  MyHomePageInheritedWidget>()!
+              .widget as MyHomePageInheritedWidget)
+          .data;
+    }
+  }
+
+  @override
+  bool updateShouldNotify(MyHomePageInheritedWidget oldWidget) {
+    return true;
+  }
+}
+
+class WidgetA extends StatelessWidget {
+  const WidgetA({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    print('WidgetAをビルド');
+    return const Text('You have pushed the button this many times:');
+  }
+}
+
+class WidgetB extends StatelessWidget {
+  const WidgetB({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    print('WidgetBをビルド');
+    final MyHomePageState state = MyHomePageInheritedWidget.of(context);
+    return Text(
+      '${state.counter}',
+      style: Theme.of(context).textTheme.headline4,
+    );
+  }
+}
+
+class WidgetC extends StatelessWidget {
+  const WidgetC({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    print('WidgetCをビルド');
+    final MyHomePageState state =
+        MyHomePageInheritedWidget.of(context, listen: false);
+    return ElevatedButton(
+      onPressed: () => state.incrementCounter(),
+      child: const Text('カウント'),
     );
   }
 }
