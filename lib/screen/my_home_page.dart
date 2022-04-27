@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-import 'package:flutter_state_managements/state/my_home_state.dart';
-import 'package:flutter_state_managements/view_model/my_home_view_model.dart';
-import 'package:flutter_state_notifier/flutter_state_notifier.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_state_managements/main.dart';
 
 class MyHomePage extends StatelessWidget {
   const MyHomePage({Key? key}) : super(key: key);
 
+  @override
   Widget build(BuildContext context) {
     print('MyHomePageをビルド');
-    return StateNotifierProvider<MyHomePageStateNotifier, MyHomePageState>(
-      create: (context) => MyHomePageStateNotifier(),
+    return ProviderScope(
       child: Scaffold(
         appBar: AppBar(
           title: const Text("Flutter"),
@@ -41,13 +38,13 @@ class WidgetA extends StatelessWidget {
   }
 }
 
-class WidgetB extends StatelessWidget {
+class WidgetB extends ConsumerWidget {
   const WidgetB({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     print('WidgetBをビルド');
-    final int counter = context.watch<MyHomePageState>().counter;
+    final int counter = ref.watch(myHomePageProvider).counter;
     return Text(
       '$counter',
       style: Theme.of(context).textTheme.headline4,
@@ -55,13 +52,13 @@ class WidgetB extends StatelessWidget {
   }
 }
 
-class WidgetC extends StatelessWidget {
+class WidgetC extends ConsumerWidget {
   const WidgetC({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final VoidCallback increment =
-        context.read<MyHomePageStateNotifier>().increment;
+        ref.read(myHomePageProvider.notifier).increment;
     print('WidgetCをビルド');
     return ElevatedButton(
       onPressed: increment,

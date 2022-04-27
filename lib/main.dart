@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_state_managements/screen/my_home_page.dart';
+import 'package:flutter_state_managements/state/my_home_state.dart';
+import 'package:flutter_state_managements/view_model/my_home_view_model.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,3 +23,7 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+final myHomePageProvider =
+    StateNotifierProvider<MyHomePageStateNotifier, MyHomePageState>(
+        (ref) => MyHomePageStateNotifier());
