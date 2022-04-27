@@ -1,6 +1,5 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,67 +16,48 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+class MyHomePage extends StatelessWidget {
+  const MyHomePage({Key? key}) : super(key: key);
 
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => MyHomePageState();
-}
-
-class MyHomePageState extends State<MyHomePage> {
-  late MyHomePageLogic myHomePageLogic;
-
-  @override
-  void initState() {
-    super.initState();
-    myHomePageLogic = MyHomePageLogic();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    print('MyHomePageStateをビルド');
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const WidgetA(),
-            WidgetB(myHomePageLogic),
-            WidgetC(myHomePageLogic),
-          ],
+    print('MyHomePageをビルド');
+    return ChangeNotifierProvider(
+      create: (context) => MyHomePageState(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("Flutter"),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const <Widget>[
+              WidgetA(),
+              WidgetB(),
+              WidgetC(),
+            ],
+          ),
         ),
       ),
     );
+    ;
   }
 }
 
-class MyHomePageLogic {
-  MyHomePageLogic() {
-    _counterController.sink.add(_counter);
-  }
-
-  final StreamController<int> _counterController = StreamController();
-  int _counter = 0;
-
-  Stream<int> get count => _counterController.stream;
+class MyHomePageState extends ChangeNotifier {
+  int counter = 0;
 
   void increment() {
-    _counter++;
-    _counterController.sink.add(_counter);
+    counter++;
+    notifyListeners();
   }
 
-  void dispose() {
-    _counterController.close();
+  void reBuild() {
+    notifyListeners();
   }
 }
 
@@ -92,38 +72,33 @@ class WidgetA extends StatelessWidget {
 }
 
 class WidgetB extends StatelessWidget {
-  const WidgetB(this.myHomePageLogic, {Key? key}) : super(key: key);
-  final MyHomePageLogic myHomePageLogic;
+  const WidgetB({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<int>(
-      stream: myHomePageLogic.count,
-      builder: (context, snapshot) {
-        print('WidgetBをビルド');
-        return Text(
-          '${snapshot.data}',
-          style: Theme.of(context).textTheme.headline4,
-        );
-      },
+    print('WidgetBをビルド');
+    // final int counter = context.watch<MyHomePageState>().counter;
+
+    // 特定の状態だけを監視する
+    final int counter =
+        context.select<MyHomePageState, int>((state) => state.counter);
+    return Text(
+      '$counter',
+      style: Theme.of(context).textTheme.headline4,
     );
   }
 }
 
 class WidgetC extends StatelessWidget {
-  const WidgetC(this.myHomePageLogic, {Key? key}) : super(key: key);
-  final MyHomePageLogic myHomePageLogic;
+  const WidgetC({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-      builder: ((context, snapshot) {
-        print('WidgetCをビルド');
-        return ElevatedButton(
-          onPressed: () => myHomePageLogic.increment(),
-          child: const Text('カウント'),
-        );
-      }),
+    final VoidCallback increment = context.read<MyHomePageState>().increment;
+    print('WidgetCをビルド');
+    return ElevatedButton(
+      onPressed: increment,
+      child: const Text('カウント'),
     );
   }
 }
